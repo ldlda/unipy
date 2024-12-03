@@ -216,6 +216,7 @@ def select_courses_to(func: typing.Callable, action: str):
 def mark_this_student(student):
     def mark(course):
         return mark_function(student, course)
+
     return mark, f"mark {format_student(student)}"
 
 
@@ -234,7 +235,7 @@ def mark_function(student, course):
             return
     print("bro cant type a number right god damn")
     print("quit life")
-    exit(1) # lmao
+    exit(1)  # lmao
 
 
 # that work too
@@ -314,6 +315,7 @@ def find():
         case _:
             print("Not a valid choice")
 
+
 def export_to_file(filename):
     with open(filename, "w") as f:
         f.write(str(STUDENTS))
@@ -322,12 +324,14 @@ def export_to_file(filename):
         f.write("\n")
         f.write(str(COURSES_MARKS))
 
+
 def import_from_file(filename):
     with open(filename, "r") as f:
-        STUDENTS = eval(f.readline()) # danger
+        STUDENTS = eval(f.readline())  # danger
         COURSES = eval(f.readline())
         COURSES_MARKS = eval(f.readline())
     return STUDENTS, COURSES, COURSES_MARKS
+
 
 def main():
     while True:
@@ -340,8 +344,8 @@ def main():
 \t5. View marks for a student
 \t6. View all courses
 \t7. View all students
-\t8. Export to a file
-\t9. Find a student or course
+\t8. Find a student or course
+\t9. More options...
 \t0. Exit
 """
         )
@@ -350,42 +354,42 @@ def main():
         match choice:
             case "1":
                 course_id = input("Course ID : ")
-                if not (course_id:= find_course_from_id(course_id)):
+                if not (course_id := find_course_from_id(course_id)):
                     print("Course ID not found")
                 else:
                     for course_dict in course_id:
-                        select_students_to(* mark_this_course(course_dict))
-                
+                        select_students_to(*mark_this_course(course_dict))
+
             case "2":
                 student_id = input("Student ID : ")
-                if not (student_id:= find_student_from_id(student_id)):
+                if not (student_id := find_student_from_id(student_id)):
                     print("Student ID not found")
                 else:
                     for student_dict in student_id:
-                        select_courses_to(* mark_this_student(student_dict))
-            
+                        select_courses_to(*mark_this_student(student_dict))
+
             case "3":
                 student_id = input("Student ID : ")
-                if not (student_id:= find_student_from_id(student_id)):
+                if not (student_id := find_student_from_id(student_id)):
                     print("Student ID not found")
                     break
                 course_id = input("Course ID : ")
-                if not (course_id:= find_course_from_id(course_id)):
+                if not (course_id := find_course_from_id(course_id)):
                     print("Course ID not found")
                     break
-                for student_dict in student_id: # O(1)
-                    for course_dict in course_id: # O(1)
-                        mark_function(student_dict, course_dict) # still O(1)
+                for student_dict in student_id:  # O(1)
+                    for course_dict in course_id:  # O(1)
+                        mark_function(student_dict, course_dict)  # still O(1)
             case "4":
                 course_id = input("Course ID : ")
-                if not (course_id:= find_course_from_id(course_id)):
+                if not (course_id := find_course_from_id(course_id)):
                     print("Course ID not found")
                 else:
                     for course_dict in course_id:
                         view_marks_for_course(course_dict)
             case "5":
                 student_id = input("Student ID : ")
-                if not (student_id:= find_student_from_id(student_id)):
+                if not (student_id := find_student_from_id(student_id)):
                     print("Student ID not found")
                 else:
                     for student_dict in student_id:
@@ -395,9 +399,38 @@ def main():
             case "7":
                 view_students()
             case "8":
-                export_to_file(input("Filename: "))
-            case "9":
                 find()
+            case "9":
+                print(
+                    """\t1. Add students
+\t2. Add courses
+\t3. Export to file (experimental)
+\t4. Import from file (experimental)
+\t9. Back
+\t0. Exit"""
+                )
+                choice = input("Choice: ")
+                match choice:
+                    case "1":
+                        input_students()
+                    case "2":
+                        input_courses()
+                    case "3":
+                        export_to_file(input("Filename: "))
+                    case "4":
+                        STUDENTS, COURSES, COURSES_MARKS = import_from_file(
+                            input("Filename: ")
+                        )
+                    case "9":
+                        continue
+                    case "0":
+                        exit()
+                    case _:
+                        print("Not a valid choice")
+                        print("back to the other thingy")
+                        continue
+                    ## its time to invest into ansi
+                    ## and a better way to print in general (good job ai)
             case "0":
                 exit()
             case _:
