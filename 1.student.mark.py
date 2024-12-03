@@ -164,18 +164,24 @@ format_NA = lambda grade: grade if grade is not None else "N/A"
 
 
 def select_students_to(func: typing.Callable, action: str):
+    YesNoAlwaysNever = None
     for student in STUDENTS:
-        if (
-            input(
-                f"""
-        {format_student(student)}
-        Select this student to {action} [yN]:
-        """
-            ).lower()
-            == "y"
-        ):
-            ## damn i would love for f to hold the [something] or some sort idfk
-            func(student)
+        print(f"{format_student(student)}")
+        if YesNoAlwaysNever is not True:
+            confirm = input(f"Select this student to {action} [Ynav]:").lower()
+            match confirm:
+                case "a":
+                    YesNoAlwaysNever = True
+                case "v":  # top 10 things never happen
+                    YesNoAlwaysNever = False
+                    break  # what else
+                case "y":
+                    pass
+                case "n":
+                    continue
+                case _:
+                    pass
+        func(student)
 
 
 def mark_this_course(course):
@@ -197,17 +203,24 @@ add_to_list = (lambda x: lambda y: x.append(y), "add to list")
 
 
 def select_courses_to(func: typing.Callable, action: str):
+    YesNoAlwaysNever = None
     for course in COURSES:
-        if (
-            input(
-                f"""
-        {format_course(course)}
-        Select this course to {action} [yN]:
-        """
-            ).lower()
-            == "y"
-        ):
-            func(course)
+        print(f"{format_course(course)}")
+        if YesNoAlwaysNever is not True:
+            confirm = input(f"Select this course to {action} [yNav]:").lower()
+            match confirm:
+                case "a":
+                    YesNoAlwaysNever = True
+                case "v":
+                    YesNoAlwaysNever = False
+                    break
+                case "y":
+                    pass
+                case "n":
+                    continue
+                case _:
+                    continue
+        func(course)
 
 
 ## bruh im so stupid
@@ -225,17 +238,20 @@ def mark_this_student(student):
 
 def mark_function(student, course):
     print(f"Marking {student['name']} for {course['name']}")
-    for _ in range(5):
+    pre = input("Mark (put blank for N/A): ").strip()
+    for _ in range(4):
         try:
-            mark = float(input("Mark: "))
+            if pre in ["", "N/A"]:
+                print("Did not mark")
+                return
+            mark = float(pre)
         except ValueError:
             print("Invalid mark")
+            pre = input("Mark: ").strip()
         else:
             COURSES_MARKS[course["id"]][student["id"]] = mark
             return
-    print("bro cant type a number right god damn")
-    print("quit life")
-    exit(1)  # lmao
+    print("cmon how did you fail that much")
 
 
 # that work too
@@ -276,7 +292,7 @@ def list_fails(course):
 
 
 def search_student(key, value):
-    return [search(lambda student: student.get(key) == value, STUDENTS)]
+    return search(lambda student: str(student.get(key)) == str(value), STUDENTS)
 
 
 ## right here!!! this!!!!
@@ -285,7 +301,7 @@ def find_student_from_id(id):
 
 
 def search_course(key, value):
-    return list(search(lambda course: course.get(key) == value, COURSES))
+    return search(lambda course: str(course.get(key)) == str(value), COURSES)
 
 
 find_course_from_id = lambda id: search(
@@ -293,25 +309,31 @@ find_course_from_id = lambda id: search(
 )
 
 
-def search(func, collection):
+def search_function(func, collection):
     for item in collection:
         if func(item):
             yield item
 
 
-search_l = lambda func, collection: (item for item in collection if func(item))
+search = lambda func, collection: (item for item in collection if func(item))
 
 
 def find():
-    match input("Search for: ").casefold():
+    match input("Search for [student|course]: ").casefold():
         case "student":
-            for student in search_student(
+            if students := search_student(
                 input("Key [id|name|dob]: "), input("Value: ")
             ):
-                print(format_student(student))
+                for student in students:
+                    print(format_student(student))
+            else:
+                print("No student found")
         case "course":
-            for course in search_course(input("Key [id|name]: "), input("Value: ")):
-                print(format_course(course))
+            if courses := search_course(input("Key [id|name]: "), input("Value: ")):
+                for course in courses:
+                    print(format_course(course))
+            else:
+                print("No course found")
         case _:
             print("Not a valid choice")
 
@@ -412,9 +434,19 @@ def main():
                 choice = input("Choice: ")
                 match choice:
                     case "1":
-                        input_students()
+                        for _ in range(4):
+                            try:
+                                input_students()
+                                break
+                            except ValueError:
+                                print("Invalid value")
                     case "2":
-                        input_courses()
+                        for _ in range(4):
+                            try:
+                                input_courses()
+                                break
+                            except ValueError:
+                                print("Invalid value")
                     case "3":
                         export_to_file(input("Filename: "))
                     case "4":
