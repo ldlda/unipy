@@ -17,7 +17,8 @@ use no objects/classes (impossible??)
 
 fun times
 """
-
+# global switch for line-too-long and invalid-name because i like my names random
+# pylint: disable=line-too-long, invalid-name
 import copy
 import collections
 import typing
@@ -190,7 +191,7 @@ def format_course(course, /, short=False):
 # STUDENTS_MARKS = collections.defaultdict(dict)
 
 # i think doctring like the other way more:
-COURSES_MARKS = collections.defaultdict(dict)
+COURSES_MARKS: dict[str, dict[str, float]] = collections.defaultdict(dict)
 
 # damn they dont make a difference!! im tripping
 
