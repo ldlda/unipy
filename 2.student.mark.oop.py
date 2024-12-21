@@ -2,6 +2,7 @@
 redo the last exercise (1.student.mark.py) now with oop
 """
 
+# pylint: disable=line-too-long, invalid-name, missing-class-docstring, missing-function-docstring
 import collections
 import functools
 import importlib
@@ -262,14 +263,14 @@ class Uni(object):
             setattr(uni, i, s[i])
 
         def ____to(l: list, t: type):
-            "ltra mega specific"
+            "ultra mega specific"
             for ind, item in enumerate(l):
                 if isinstance(item, dict):
                     l[ind] = t(**item)
 
         ____to(uni.STUDENTS, Student)
         ____to(uni.COURSES, Course)
-        uni.COURSES_MARKS = collections.defaultdict(dict, uni.COURSES_MARKS)
+        uni.COURSES_MARKS = collections.defaultdict(dict, uni.COURSES_MARKS) # insane hacks
         return uni
 
 
@@ -703,7 +704,7 @@ def ui():
             continue
         try:
             action()
-        except Exception as e: #pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             print("use it correctly bruh")
             print(f"{e.__class__.__name__}: {e}")
 
