@@ -51,13 +51,24 @@
 
 
 import subprocess
+import os
+match os.name:
 
-
-with subprocess.Popen([
-    "powershell.exe",
-    "-NoExit",  # Don't exit after running commands
-    "-NoLogo",  # Skip the copyright banner if you want
-    "-ExecutionPolicy", "Bypass",  # Ensure scripts can run
-    "-Command", "$Host.UI.RawUI.WindowTitle = 'power shell'"  # Optional: custom window title
-]) as process:
-    process.wait()
+    case"nt":
+        if os.path.exists(r"C:\msys64\usr\bin\zsh.exe") and input("run zsh? [y/n] ").lower() == "y":
+            with subprocess.Popen([
+                r"C:\msys64\usr\bin\zsh.exe"
+            ]) as process:
+                process.wait()
+        else:
+            with subprocess.Popen([
+                "powershell.exe",
+                "-NoExit",  # Don't exit after running commands
+                "-NoLogo",  # Skip the copyright banner if you want
+                "-ExecutionPolicy", "Bypass",  # Ensure scripts can run
+                "-Command", "$Host.UI.RawUI.WindowTitle = 'power shell'"  # Optional: custom window title
+            ]) as process:
+                process.wait()
+    case "posix":
+        with subprocess.Popen(["zsh"]) as proc:
+            proc.wait()
