@@ -17,6 +17,7 @@ use no objects/classes (impossible??)
 
 fun times
 """
+
 # global switch for line-too-long and invalid-name because i like my names random
 # pylint: disable=line-too-long, invalid-name
 import copy
@@ -83,7 +84,10 @@ def input_course():
     ## convert to number if id is a number
     ## even tho i know its never a number
     """Prompts the user to input a course ID and name, converts the ID to a number if possible, and returns a dictionary with the course details."""
-    return {"id": try_convert(input("Course ID: ")), "name": input("Course Name: ")}
+    id_ = validate_id(input("Course ID: "), find_course_from_id)
+    if id_ is None:
+        return
+    return {"id": id_, "name": input("Course Name: ")}
 
 
 # convert to number ahh
@@ -115,13 +119,37 @@ def try_convert(s: str) -> int | str:
 # however! idc
 
 
+def validate_id(id_, funny_find_function: typing.Callable):
+    "find id or converted id with the find function (find_student_from_id, find_course_from_id), if found returns none, otherwise return converted id"
+    converted_id_ = try_convert(id_)
+    # if either RAISE
+    _exists = (
+        bool(next(funny_find_function(converted_id_)))
+        if converted_id_ is id_
+        else bool(
+            next(funny_find_function(converted_id_)) or next(funny_find_function(id_))
+        )
+    )
+    if _exists:
+        # raise ValueError("id exists")
+        return None
+    return converted_id_
+
+
 def input_student():
     """Prompts the user to input a student ID, name, and date of birth, and returns a dictionary with the student details."""
+
+    id_ = validate_id(input("Student ID: "), find_student_from_id)
+    if id_ is None:
+        return
     return {
-        "id": try_convert(input("Student ID: ")),
+        "id": id_,
         "name": input("Student Name: "),
         "DoB": input("Date of Birth: "),
     }
+
+
+# may allow id overlaps ima not fix it rn
 
 
 def input_courses():
@@ -129,7 +157,11 @@ def input_courses():
 
     The courses are added to COURSES."""
     for _ in range(int(input("Number of courses: "))):
-        input_course()
+        while (cource := input_course()) is None:
+            print(
+                f"invalid course (exists course id), try again: current inputted course number {_ + 1}"
+            )
+        COURSES.append(cource)
 
 
 def input_students():
@@ -137,7 +169,11 @@ def input_students():
 
     The students are added to STUDENTS."""
     for _ in range(int(input("Number of students: "))):
-        input_student()
+        while (student := input_student()) is None:
+            print(
+                f"invalid student (student id exists), try again: current inputted student number {_ + 1}"
+            )
+        STUDENTS.append(student)
 
 
 def format_student(student, include_DoB: bool = False, /, short=False):
@@ -209,10 +245,17 @@ def view_mark(course, student):
     Returns:
         float | None: The mark for the student in the course, or None if the student has not been marked.
     """
-    if COURSES_MARKS[course["id"]].get(student["id"]) is not None:
+    if student["id"] in COURSES_MARKS[course["id"]]:
         return COURSES_MARKS[course["id"]][student["id"]]
-    else:
-        return None
+    return None
+
+
+def del_mark(course, student):
+    "delete mark with .pop"
+    if (makr := view_mark(course, student)) is not None:
+        COURSES_MARKS[course["id"]].pop(student["id"])
+        return makr
+    return None
 
 
 # format_NA = lambda grade: grade if grade is not None else "N/A"
@@ -248,7 +291,7 @@ def select_students_to(func: typing.Callable, action: str):
     for student in STUDENTS:
         print(f"{format_student(student)}")
         if YesNoAlwaysNever is not True:
-            confirm = input(f"Select this student to {action} [Ynav]:").lower()
+            confirm = input(f"Select this student to {action} [Ynav]:").strip().lower()
             match confirm:
                 case "a":
                     YesNoAlwaysNever = True
@@ -256,9 +299,9 @@ def select_students_to(func: typing.Callable, action: str):
                     YesNoAlwaysNever = False
                     break  # what else
                 case "y":
-                    pass
+                    pass  # proceed
                 case "n":
-                    continue
+                    continue  # skip current loop
                 case _:
                     pass
         func(student)
@@ -313,7 +356,7 @@ def select_courses_to(func: typing.Callable, action: str):
     for course in COURSES:
         print(f"{format_course(course)}")
         if YesNoAlwaysNever is not True:
-            confirm = input(f"Select this course to {action} [yNav]:").lower()
+            confirm = input(f"Select this course to {action} [yNav]:").strip().lower()
             match confirm:
                 case "a":
                     YesNoAlwaysNever = True
@@ -536,6 +579,22 @@ def search(func, collection):
     return (item for item in collection if func(item))
 
 
+def del_student_from_id(student_id):
+    "del one stdent"
+    for student in find_student_from_id(student_id):
+        ts = student
+        STUDENTS.remove(student)
+        return ts
+
+
+def del_course_from_id(course_id):
+    "one course"
+    for course in find_course_from_id(course_id):
+        ts = course
+        COURSES.remove(course)
+        return ts
+
+
 def find():
     """
     Prompts the user to search for either students or courses based on specified criteria.
@@ -562,6 +621,38 @@ def find():
                 print("No course found")
         case _:
             print("Not a valid choice")
+
+
+def input_dsfi():
+    "del one stdent, with input"
+    print("Remove one stdent from database")
+    if (student := input_sid()) is not None:
+        ts = student
+        STUDENTS.remove(student)
+        print("Deleted", format_student(ts))
+    else:
+        print("No student found")
+
+
+def input_dcfi():
+    "del one course, with input"
+    print("Remove one course from database")
+    if (course := input_cid()) is not None:
+        ts = course
+        COURSES.remove(course)
+        print("Deleted", format_course(ts))
+    else:
+        print("No course found")
+
+
+def input_del_mark():
+    "delete mark"
+    if (stduent := input_sid()) is None or (course := input_cid()) is None:
+        return
+    if (makr := del_mark(course, stduent)) is not None:
+        print("Deleted mark", makr)
+    else:
+        print("No mark found")
 
 
 def export_to_file(filename):
@@ -601,10 +692,12 @@ def import_from_file(filename):
         potential security risk if the file is not trusted.
     """
     with open(filename, "r", encoding="utf-8") as f:
-        STUDENTS = eval(f.readline())  # danger
-        COURSES = eval(f.readline())
-        COURSES_MARKS = eval(f.readline())
-    return STUDENTS, COURSES, COURSES_MARKS
+        _STUDENTS = eval(f.readline())  # danger
+        _COURSES = eval(f.readline())
+        _COURSES_MARKS = eval(f.readline())
+        if f.readline() is not None:
+            raise ValueError("invalid file")
+    return _STUDENTS, _COURSES, _COURSES_MARKS
 
 
 def input_cid():
@@ -714,6 +807,9 @@ def main():
 \t2. Add courses
 \t3. Export to file (experimental)
 \t4. Import from file (experimental)
+\t5. Delete a student
+\t6. Delete a course
+\t7. Delete a mark
 \t9. Back
 \t0. Exit"""
                 )
@@ -739,6 +835,10 @@ def main():
                         STUDENTS, COURSES, COURSES_MARKS = import_from_file(
                             input("Filename: ")
                         )
+                    case "5":
+                        input_dsfi()
+                    case "6":
+                        input_dcfi()
                     case "9":
                         continue
                     case "0":

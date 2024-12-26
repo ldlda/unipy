@@ -32,7 +32,7 @@
 #             window_name = namebuffer.value
 #             print(f"Restoring window for PID {lpdwProcessId.value}: {window_name} HWND {hwnd} code {showcode}")
 #             user32.ShowWindow(hwnd, showcode)
-#             return False # we done
+#             # return False # we NOT done
 #         return True  # Continue enumeration
 
 #     # Pass the PID as an LPARAM (64-bit on 64-bit systems)
@@ -46,29 +46,36 @@
 #     pid = wintypes.DWORD()
 #     user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
 #     return pid.value
-# # why do you do this 
-# show(pidforeground(), 2) 
+# # why do you do this
+# show(pidforeground(), 2)
 
 
 import subprocess
 import os
-match os.name:
 
-    case"nt":
-        if os.path.exists(r"C:\msys64\usr\bin\zsh.exe") and input("run zsh? [y/n] ").lower() == "y":
-            with subprocess.Popen([
-                r"C:\msys64\usr\bin\zsh.exe"
-            ]) as process:
+match os.name:
+    case "nt":
+        if (
+            os.path.exists(r"C:\msys64\usr\bin\zsh.exe")
+            and input("run zsh? [y/n] ").lower() == "y"
+        ):
+            with subprocess.Popen([r"C:\msys64\usr\bin\zsh.exe"]) as process:
                 process.wait()
+
         else:
-            with subprocess.Popen([
-                "powershell.exe",
-                "-NoExit",  # Don't exit after running commands
-                "-NoLogo",  # Skip the copyright banner if you want
-                "-ExecutionPolicy", "Bypass",  # Ensure scripts can run
-                "-Command", "$Host.UI.RawUI.WindowTitle = 'power shell'"  # Optional: custom window title
-            ]) as process:
+            with subprocess.Popen(
+                [
+                    "powershell.exe",
+                    "-NoExit",  # Don't exit after running commands
+                    "-NoLogo",  # Skip the copyright banner if you want
+                    "-ExecutionPolicy",
+                    "Bypass",  # Ensure scripts can run
+                    "-Command",
+                    "$Host.UI.RawUI.WindowTitle = 'power shell'",  # Optional: custom window title
+                ]
+            ) as process:
                 process.wait()
+
     case "posix":
         with subprocess.Popen(["zsh"]) as proc:
             proc.wait()
