@@ -55,8 +55,8 @@ def todatetime(s: str) -> datetime:
         print("ok nerd")
         r = datetrying
         return r
-    finally:
-        print(datetrying)
+    # finally:
+    #     print(datetrying)
 
     date_formats = ["%d/%m/%Y", "%d-%m-%Y"]
     for date_format in date_formats:
@@ -535,10 +535,10 @@ class Structure(object):
 
     def __post_init__(self):
         if self.name is None:
-            self.name = self.func.__name__
+            super().__setattr__("name",self.func.__name__)
 
         if self.description is None:
-            self.description = self.func.__doc__
+            super().__setattr__("description", self.func.__doc__)
 
     def __call__(self, *args, **kwargs):
         return self.func(*args, **kwargs)

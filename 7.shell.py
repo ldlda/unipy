@@ -57,7 +57,7 @@ match os.name:
     case "nt":
         if (
             os.path.exists(r"C:\msys64\usr\bin\zsh.exe")
-            and input("run zsh? [y/n] ").lower() == "y"
+            and input("run zsh? [y/n] ").strip().lower() == "y"
         ):
             with subprocess.Popen([r"C:\msys64\usr\bin\zsh.exe"]) as process:
                 process.wait()
