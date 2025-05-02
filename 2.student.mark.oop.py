@@ -270,7 +270,9 @@ class Uni(object):
 
         ____to(uni.STUDENTS, Student)
         ____to(uni.COURSES, Course)
-        uni.COURSES_MARKS = collections.defaultdict(dict, uni.COURSES_MARKS) # insane hacks
+        uni.COURSES_MARKS = collections.defaultdict(
+            dict, uni.COURSES_MARKS
+        )  # insane hacks
         return uni
 
 
@@ -535,7 +537,7 @@ class Structure(object):
 
     def __post_init__(self):
         if self.name is None:
-            super().__setattr__("name",self.func.__name__)
+            super().__setattr__("name", self.func.__name__)
 
         if self.description is None:
             super().__setattr__("description", self.func.__doc__)
